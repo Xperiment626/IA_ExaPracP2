@@ -22,7 +22,7 @@ class Graph:
         queue.append(s)
 
         visited[s]=True
-
+        print("\nBFS search: ")
         while queue:
             s=queue.pop(0)
             print(s, end= " ")
@@ -45,7 +45,7 @@ class Graph:
         queue.append(s)
 
         visited[s]=True
-
+        print("\nDFS search: ")
         while queue:
             s=queue.pop()
             print(s, end= " ")
@@ -212,17 +212,17 @@ def main(args):
         target0 = (2, 0)
         target1 = (2, 3)
         
-        print("\nBúsqueda anchura: ")
+        print("\n************ BUSQUEDA EN ANCHURA ************")
         parentsBFS = jugTree.BFS(initialState)
-        print("\n", parentsBFS)
-        print("ruta target 0: ", jugTree.pathfromOrigin(initialState, target0, parentsBFS))
-        print("ruta target 1: ", jugTree.pathfromOrigin(initialState, target1, parentsBFS))
+        print("\n\nBFS parents: ", parentsBFS)
+        print(f"\nPath to target {target0}: ", jugTree.pathfromOrigin(initialState, target0, parentsBFS))
+        print(f"Path to target {target1}: ", jugTree.pathfromOrigin(initialState, target1, parentsBFS))
         
-        print("\nBúsqueda profundidad: ")
+        print("\n************ BUSQUEDAD EN PROFUNDIDAD ************")
         parentsDFS = jugTree.DFS(initialState)
-        print("\n", parentsDFS)
-        print("ruta target 0: ", jugTree.pathfromOrigin(initialState, target0, parentsDFS))
-        print("ruta target 1: ", jugTree.pathfromOrigin(initialState, target1, parentsDFS))
+        print("\n\nDFS parents: ", parentsDFS)
+        print(f"\nPath to target {target0}: ", jugTree.pathfromOrigin(initialState, target0, parentsDFS))
+        print(f"Path to target {target1}: ", jugTree.pathfromOrigin(initialState, target1, parentsDFS))
         
         plt.figure(figsize=(10,10))
         #Ploting the graph in Kamada Kawai Layout
