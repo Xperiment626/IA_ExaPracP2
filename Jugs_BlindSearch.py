@@ -1,9 +1,8 @@
 from collections import defaultdict
-import random as r
-import networkx as nx
-import matplotlib.pyplot as plt
-from numpy import short
+import networkx as nx  # LIBRERIA PARA DIBUJAR EL GRAFO
+import matplotlib.pyplot as plt # LIBRERIA PARA GUARDAR EL GRAFO DIBUJADO COMO IMAGEN
 
+# ******************************** CODIGO RECICLADO DE CLASES Y DEBERES PASADOS ********************************
 class Graph:
     def __init__(self) -> None:
         self.graph = defaultdict(list)
@@ -12,16 +11,13 @@ class Graph:
         self.graph[u].append(v)
 
     def BFS(self,s):
-
         parents={}
         parents[s]=None
-
         visited = {gi:False for gi in self.graph.keys()}
-
         queue =[]
         queue.append(s)
-
         visited[s]=True
+        
         print("\nBFS search: ")
         while queue:
             s=queue.pop(0)
@@ -35,16 +31,13 @@ class Graph:
         return parents
     
     def DFS(self,s):
-
         parents={}
         parents[s]=None
-
         visited = {gi:False for gi in self.graph.keys()}
-
         queue =[]
         queue.append(s)
-
         visited[s]=True
+        
         print("\nDFS search: ")
         while queue:
             s=queue.pop()
@@ -69,12 +62,15 @@ class Graph:
             pathO.insert(0, i)
             if i == origin:
                 return pathO
-            
+
+# ******************************** FIN DE CODIGO RECICLADO ******************************** 
 class Jug:
+    # CONSTRUCTOR
     def __init__(self, capacity, state = 0):
         self.capacity = capacity
         self.state = state
         
+    # ******* GETTERS Y SETTERS *******
     def setState(self, state):
         self.state = state
     
@@ -84,9 +80,15 @@ class Jug:
     def getState(self):
         return self.state
     
+    # ******* FIN GETTERS Y SETTERS *******
+    
+    # ******* FUNCIONES SUCESORAS *******
+    
+    # Vaciar jarra
     def empty(self):
         self.state = 0  
-      
+    
+    # Verter contenido de una jarra en otra jarra
     def pour(self, jug):
         if jug.getState() == 0:
             if self.getState() <= jug.getCapacity():
@@ -106,22 +108,30 @@ class Jug:
                     jug.fill(jug.getState() + permitted)
                     self.setState(leftOver)
     
+    # Llenar jarra
     def fill(self, content = None):
         if content is not None:
             self.setState(content)
         else:
             self.setState(self.getCapacity())
             
-    def action(self, jug):
+    # ******* FIN FUNCIONES SUCESORAS *******
+    
+    # Funcion para generar nuevos estados
+    def newStates(self, jug):
+        
+        # Objetos jarra auxiliares para la generación de los nuevos estados
         auxEmpty = Jug(self.getCapacity(), self.getState())
         auxPour = Jug(self.getCapacity(), self.getState())
         auxFill = Jug(self.getCapacity(), self.getState())
         auxJug = Jug(jug.getCapacity(), jug.getState())
         
+        # Utilizando objetos auxiliares para generar el nuevo estado
         auxEmpty.empty()
         auxPour.pour(auxJug)
         auxFill.fill()
         
+        # Validar con que jarra estamos trabajando para devolver el output correcto del nuevo estado
         if self.getCapacity() == 4:
             return [(auxEmpty.getState(), jug.getState()),
                 (auxPour.getState(), auxJug.getState()),
@@ -131,23 +141,26 @@ class Jug:
                 (auxJug.getState(), auxPour.getState()),
                 (jug.getState(), auxFill.getState())]
 
-jugTree = Graph()
-G = nx.Graph()
+# CREANDO LOS GRAFOS
+jugTree = Graph() # GRAFO A PARTIR DEL CODIGO RECICLADO.
+G = nx.Graph() # GRAFO A PARTIR DE LA LIBRERIA NETWORKX PARA CREARLO EN FORMA GRAFICA
 
+# Genera los hijos del nodo raiz, y se almacenan los primeros estados
 def generateRootChilds(bj, sj, states):
     
-    childs = bj.action(sj)
+    childs = bj.newStates(sj)
     for child in childs:
         if child not in states and child not in jugTree.graph[states[-1]]:
             jugTree.addEdge(states[-1], child)
             G.add_edge(states[-1], child)
             
-    childs = sj.action(bj)
+    childs = sj.newStates(bj)
     for child in childs:
         if child not in states and child not in jugTree.graph[states[-1]]:
             jugTree.addEdge(states[-1], child)
             G.add_edge(states[-1], child)
 
+# Una vez generados los hijos raiz, se procede a expandir estos nuevos nodos con nuevos estados.
 def generateChilds(bj, sj, states, state):
     auxStates = [states[-1]]
     
@@ -160,13 +173,13 @@ def generateChilds(bj, sj, states, state):
             bj.setState(node[0])
             sj.setState(node[1])
             
-            childs = bj.action(sj)
+            childs = bj.newStates(sj)
             for child in childs:
                 if child not in states and child not in auxStates and child not in jugTree.graph[node]:
                     jugTree.addEdge(node, child)
                     G.add_edge(node, child)
                     
-            childs = sj.action(bj)
+            childs = sj.newStates(bj)
             for child in childs:
                 if child not in states and child not in auxStates and child not in jugTree.graph[node]:
                     jugTree.addEdge(node, child)
@@ -174,7 +187,8 @@ def generateChilds(bj, sj, states, state):
        
     auxStates.pop(0)
     [states.append(state) for state in auxStates]
-    
+
+# Ejecutamos la creacion automatica del arbol   
 def execute(bigJugCapacity, shortJugCapacity, initialState = (0,0)):
     states = [initialState]
     bigJug = Jug(bigJugCapacity, initialState[0])
@@ -197,8 +211,6 @@ def main(args):
     Ejemplo:
     python Jugs_BlindSearch.py 4 3 0 0
     """
-    answers = []
-    bestAnswer = None
     
     if len(args) == 4:
         
@@ -206,6 +218,7 @@ def main(args):
         shortJugCapacity = int(args[1])
         initialState = tuple((int(args[2]), int(args[3])))
         
+        # Generamos el grafo del problema de las jarras
         execute(bigJugCapacity, shortJugCapacity, initialState)
         
         # target = (2, 0) or (2, 3)
@@ -224,10 +237,14 @@ def main(args):
         print(f"\nPath to target {target0}: ", jugTree.pathfromOrigin(initialState, target0, parentsDFS))
         print(f"Path to target {target1}: ", jugTree.pathfromOrigin(initialState, target1, parentsDFS))
         
+        # Codigo adicional que guarda mi grafo creado como imagen en el mismo directorio del proyecto
+        # ******* KAMADA LAYOUT ***********
         plt.figure(figsize=(10,10))
         #Ploting the graph in Kamada Kawai Layout
         nx.draw(G, with_labels=1, node_size=1000,font_size=20)
         plt.savefig("G-KamadaKawai_Layout.png")
+        
+        # ******* LAYOUT DIFERENTE *********
         #Saving the figure
         # nx.draw_circular(G, with_labels=1,node_size=1000,font_size=20)
         # plt.savefig("G-Circular_Layout.png")
